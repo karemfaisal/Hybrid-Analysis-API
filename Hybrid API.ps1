@@ -27,6 +27,10 @@ Switch: search for this vx_family on Hybrid Analysis
 
 Switch: search for file name on Hybrid Analysis
 
+.PARAMETER hash
+
+Switch: search for hash on Hybrid Analysis and Virustotal, to search in virus total, user have to suplly VT_API
+
 .PARAMETER result
 
 Optional: retrive only the result you asked for Values = {imphash,sha256,sha1,md5,,ssdeep,submit_name, type_short, hosts,domains,vx_family,threat_score,av_detect}
@@ -50,9 +54,6 @@ Optional, path of output file
 .NOTES
 You have to set execution policy in powershell to bypass
 
-.LINK
-
-http://clymb3r.wordpress.com/2013/04/09/modifying-mimikatz-to-be-loaded-using-invoke-reflectivedllinjection-ps1/
 #>
 
 
@@ -62,8 +63,8 @@ http://clymb3r.wordpress.com/2013/04/09/modifying-mimikatz-to-be-loaded-using-in
         [string[]] $vx_family,
         [string[]] $hash,
         [string[]] $API,
-        [string[]] $result
-        
+        [string[]] $result,
+        [string[]] $VT_API 
        
 
     )
@@ -72,6 +73,7 @@ process{
    $result_Data = New-Object System.Collections.Generic.List[string]
    $result_obj = New-Object System.Collections.Generic.List[object]
    $attacks = New-Object System.Collections.Generic.List[string]
+   $VT_res = New-Object System.Collections.Generic.List[object]
     if($filename){
 
         foreach($f in $filename)
@@ -174,5 +176,60 @@ process{
 
 
     }
+
+    if($hash)
+    {
+        if($VT_API)
+        {
+         Write-Host -ForegroundColor Green "VT_API limit is 4 requests in Minute, if you provided n APIs then this script speed will be 4*n request in Minute"
+         Write-Host -ForegroundColor Green "if your total requests is less than 4 then the script will not set a delay between a request and another"
+            $Sleep = [System.Math]::Ceiling( 60 / ($VT_API.Length * 4))
+            foreach($h in $hash)
+            {
+                      $Index_of_APIKey = ([system.math]::Floor($i / 4)) % $VT_API.Length
+                      $VTAPI = $VT_API[$Index_of_APIKey]
+                      $res = Invoke-WebRequest "https://www.virustotal.com/vtapi/v2/file/report?apikey=$VTAPI&resource=$h" -Method Get 
+                      $res = $res.Content | ConvertFrom-Json 
+                      $VT_res.Add($res)  
+                      if($hash.length -gt 4)
+                      {
+                        Start-Sleep -Seconds $Sleep
+                      }
+            }
+
+            0..($hash.Length -1) | Select-Object  @{n="Hash";e={$hash[$_]}} ,  @{n="VT Result";e={$VT_res[$_].positives}}
+
+        }
+        else
+        {
+            Write-Host -ForegroundColor Green 'you did not provide Virus total API in $VT_API paramter, so we are going to use Hybird Analysis'
+            foreach($h in $hash)
+            {
+                $res = Invoke-RestMethod "https://www.hybrid-analysis.com/api/v2/search/hash?_timestamp=1571506112419" -Headers @{'accept' = 'application/json'; 'user-agent' = 'Falcon Sandbox' ; 'Content-Type' = 'application/x-www-form-urlencoded' ; 'api-key' = "$API"} -Method Post -Body @{'hash' = "$h" } 
+                if( [string]::IsNullOrEmpty($res.av_detect) )
+                {
+                    $result_Data.Add("Not in Hybrid DB")
+                }
+                elseif($res.Count -gt 1)
+                {
+                    $result_Data.Add($res[0].av_detect)
+                }
+                else
+                {
+                    $result_Data.Add($res.av_detect)
+
+                }
+            }
+
+             0..($hash.Length -1) | Select-Object  @{n="Hash";e={$hash[$_]}} ,  @{n="VT Result";e={$result_Data[$_]}}
+
+        }
+
+
+
+
+    }
+
+
 }
 }

@@ -33,6 +33,16 @@ for long time Importing add the above command to  Microsoft. PowerShell_profile.
 
 ![2](https://raw.githubusercontent.com/karemfaisal/Hybrid-Analysis-API/master/Misc/output2.JPG)
 
+you can search by hashes, if you supply -VT_API, script will search hashes in virus total, if you didn't then the script will use the supplied Hybrid Analysis API
+
+*the following script will use VT_API for hashes and Hybrid Analysis for filename*
+
+```powershell
+./Hybrid-API -VT_API <VT_API>,<VT_API> -hash <hash1>,<hash2>,<hash3> -API <API> -filename mimikatz -result imphash
+```
+
+![output3](https://raw.githubusercontent.com/karemfaisal/Hybrid-Analysis-API/master/Misc/output3.JPG)
+
 ### Authors
 
 * **Karem Ali**  - [twitter](https://twitter.com/KaremAliFaisal) [LinkedIn](https://www.linkedin.com/in/karem-ali-14a14910b/l)
@@ -42,7 +52,7 @@ for long time Importing add the above command to  Microsoft. PowerShell_profile.
 ### To-Do
 
 - searching using vx_family
-- searching using list of hashes
+- ~~searching using list of hashes~~
 
 
 
