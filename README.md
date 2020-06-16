@@ -21,9 +21,9 @@
 of course this script could be imported as module
 
 ```powershell
-Import-Module -Path "Hybrid API.ps1"
+Import-Module -Path "Path to Hybrid API.ps1"
 ```
-for long time Importing add the above command to  Microsoft. PowerShell_profile.ps1 which could be found by running $profile in the PowerShell and create the path if it's not existed
+**for long time Importing** add the above command to  Microsoft. PowerShell_profile.ps1 which could be found by running $profile in the PowerShell and create the path if it's not existed
 
 
 
