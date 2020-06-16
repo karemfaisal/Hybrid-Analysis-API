@@ -49,7 +49,7 @@ Optional, path of output file
 
 .EXAMPLE
 
-./Hybrid.ps1 -API <API> -filename (get-content -path malwares.txt) -result (get-contetn -path result.txt)
+./Hybrid.ps1 -API <API> -filename (get-content -path malwares.txt) -result (get-content -path result.txt)
 
 .NOTES
 You have to set execution policy in powershell to bypass
@@ -184,17 +184,20 @@ process{
          Write-Host -ForegroundColor Green "VT_API limit is 4 requests in Minute, if you provided n APIs then this script speed will be 4*n request in Minute"
          Write-Host -ForegroundColor Green "if your total requests is less than 4 then the script will not set a delay between a request and another"
             $Sleep = [System.Math]::Ceiling( 60 / ($VT_API.Length * 4))
+            $hash = $hash | Sort-Object -Unique
+            $i = 0
             foreach($h in $hash)
-            {
-                      $Index_of_APIKey = ([system.math]::Floor($i / 4)) % $VT_API.Length
-                      $VTAPI = $VT_API[$Index_of_APIKey]
-                      $res = Invoke-WebRequest "https://www.virustotal.com/vtapi/v2/file/report?apikey=$VTAPI&resource=$h" -Method Get 
-                      $res = $res.Content | ConvertFrom-Json 
-                      $VT_res.Add($res)  
-                      if($hash.length -gt 4)
-                      {
+            {  
+                $Index_of_APIKey = ([system.math]::Floor($i / 4)) % $VT_API.Length
+                $VTAPI = $VT_API[$Index_of_APIKey]
+                $res = Invoke-WebRequest "https://www.virustotal.com/vtapi/v2/file/report?apikey=$VTAPI&resource=$h" -Method Get 
+                $res = $res.Content | ConvertFrom-Json 
+                $VT_res.Add($res)  
+                $i++
+                if($hash.length -gt 4)
+                {
                         Start-Sleep -Seconds $Sleep
-                      }
+                }
             }
 
             0..($hash.Length -1) | Select-Object  @{n="Hash";e={$hash[$_]}} ,  @{n="VT Result";e={$VT_res[$_].positives}}
