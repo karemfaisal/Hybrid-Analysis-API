@@ -5,24 +5,24 @@
 
 ### How to use
 
-```powershell
-./Hybrid.ps1 -API <API> -filename mimikatz -result IMPhash,sha256
-```
-
-```powershell
-./Hybrid.ps1 -API <API> -filename mimikatz,emotet -result IMPhash,sha256,hosts,domains
-```
-
-```powershell
-./Hybrid.ps1 -API <API> -filename (get-content -Path malwares.txt) -result (get-content -Path result.txt)
-```
-
-
-of course this script could be imported as module
-
+Load the function
 ```powershell
 Import-Module -Path "Path to Hybrid API.ps1"
 ```
+then 
+```powershell
+Hybrid-API -API <API> -filename mimikatz -result IMPhash,sha256
+```
+or 
+```powershell
+Hybrid-API -API <API> -filename mimikatz,emotet -result IMPhash,sha256,hosts,domains
+```
+or 
+```powershell
+Hybrid-API -API <API> -filename (get-content -Path malwares.txt) -result (get-content -Path result.txt)
+```
+
+
 **for long time Importing** add the above command to  Microsoft. PowerShell_profile.ps1 which could be found by running $profile in the PowerShell and create the path if it's not existed
 
 
